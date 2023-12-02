@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/dswelbor/adventofcode/aoc2023/day_one"
+	"github.com/dswelbor/adventofcode/aoc2023/day_two"
 )
 
 func main() {
@@ -29,6 +30,8 @@ func main() {
 	switch *dayPtr {
 	case 1:
 		day_one.SolveDayOne(inputPtr, *partPtr)
+	case 2:
+		day_two.SolveDayTwo(inputPtr, *partPtr)
 	default:
 		fmt.Println("Day: " + strconv.Itoa(*dayPtr) + " not implemented")
 	}
