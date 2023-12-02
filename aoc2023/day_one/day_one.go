@@ -2,6 +2,7 @@ package day_one
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -39,8 +40,6 @@ func solvePartTwo(input *[]string) {
 	fmt.Println("--- Solving Day One - Part Two! ---")
 	// Create map of int and string representations of numbers
 	digitsMapPtr := createWordIntMap()
-	// debug
-	fmt.Println(digitsMapPtr)
 
 	// Get all the calibration partOneNumbers
 	// partTwoRegex := "((?=(\\d))|(?=(one))|(?=(two))|(?=(three))|(?=(four))|(?=(five))|(?=(six))|(?=(seven))|(?=(eight))|(?=(nine)))"
@@ -48,8 +47,6 @@ func solvePartTwo(input *[]string) {
 	partTwoNumbers := calibrationNumbers(input, partTwoRegex, digitsMapPtr)
 
 	// Sum all the calibration numbers
-	// debugging - print calibration numbers
-	fmt.Println(partTwoNumbers)
 	partTwoSum := sumNumbers(partTwoNumbers)
 
 	// Print the sum
@@ -74,28 +71,21 @@ func calibrationNumbers(input *[]string, regexPattern string, digitsMap *map[str
 
 // Parse a calibration number from an input string line
 func calibrationNumber(inputStr string, regexPattern string, digitsMap *map[string]string) int {
-	// r := regexp.MustCompile("\\d")
-	// r := regexp2.MustCompile(regexPattern)
-	reg := regexp2.MustCompile(regexPattern, 0)
-	regRev := regexp2.MustCompile(regexPattern, regexp2.RightToLeft)
-	// matches := r.FindAllString(inputStr, -1)
-	matches := regexp2FindAllString(reg, inputStr)
-	matchesRev := regexp2FindAllString(regRev, inputStr)
+	// Grab all overlapping matches
+	// Note: regexp.FindAllString(string) does not support overlapping matches
+	// This is important since abconeightxyz should return matches: ["one", "eight"] with a shared 'e'
+	matchesPtr := findOverlappingStrings(inputStr, regexPattern)
 	// handle number "words" and not just digits
 	if digitsMap != nil {
-		matches = *(parseNumbers(&matches, digitsMap))
-	}
-	if digitsMap != nil {
-		matchesRev = *(parseNumbers(&matchesRev, digitsMap))
+		matchesPtr = parseNumbers(matchesPtr, digitsMap)
 	}
 
-	// edge case - no matches
-	//matchesLen := len(matches)
-
+	// dereference matches
+	matches := *matchesPtr
 	// grab first and last numbers
+	matchesLen := len(matches)
 	firstNum := matches[0]
-	// lastNum := matches[matchesLen-1]
-	lastNum := matchesRev[0]
+	lastNum := matches[matchesLen-1]
 
 	// combine the calibration number elements
 	combinedNum, err := strconv.Atoi(firstNum + lastNum)
@@ -115,6 +105,37 @@ func regexp2FindAllString(re *regexp2.Regexp, s string) []string {
 		m, _ = re.FindNextMatch(m)
 	}
 	return matches
+}
+
+/*
+*
+
+	Implemented a find all overlapping strings function since
+	regexp.FindAllString(string) returns all non overlapping matches. regexp2
+	provides a right to left search, as well as lookahead capabilities.
+	However, this function allows us to find overlapping matches using stdlib
+	regexp functionality
+*/
+func findOverlappingStrings(inputStr string, regexPattern string) *[]string {
+	// testing regexp lib behavior
+	// testStr := "eightbpsqrkzhqbhjlrxmzsixvvmgtrseventwo7oneightjbx"
+	// testRegex := "(\\d|one|two|three|four|five|six|seven|eight|nine)"
+
+	// build regexp obj
+	reg := regexp.MustCompile(regexPattern)
+
+	var matches []string
+	matchIndex := reg.FindStringIndex(inputStr)
+	for len(matchIndex) != 0 {
+		i, j := matchIndex[0], matchIndex[1]
+		match := inputStr[i:j]
+		matches = append(matches, match)
+
+		// trim the testStr to get overlapping matches
+		inputStr = inputStr[i+1 : len(inputStr)]
+		matchIndex = reg.FindStringIndex(inputStr)
+	}
+	return &matches
 }
 
 func reverseString(inputString string) string {
