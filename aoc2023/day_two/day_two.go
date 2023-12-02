@@ -59,7 +59,6 @@ func (r rgbDiceRound) Info() *map[string]string {
 		"blue":  strconv.Itoa(r.blue),
 	}
 	return &infoMap
-
 }
 
 type rgbDiceGame struct {
@@ -75,9 +74,14 @@ func (g rgbDiceGame) Id() string {
 
 // return id and game info as string=>string map
 func (g rgbDiceGame) Info() *map[string]string {
+	// Calculate isValid and game "power"
+	validStr := strconv.FormatBool(g.valid())
+	powerStr := strconv.Itoa(g.power())
+	// map id, valid, and game "power"
 	infoMap := map[string]string{
 		"id":    g.Id(),
-		"valid": strconv.FormatBool(g.valid()),
+		"valid": validStr,
+		"power": powerStr,
 	}
 	return &infoMap
 }
@@ -94,6 +98,14 @@ func (g rgbDiceGame) valid() bool {
 		valid = valid && gameValidator.Validate(roundInfoPtr)
 	}
 	return valid
+}
+
+func (g rgbDiceGame) power() int {
+	// var powerBehavior utility.PowerBehavior
+	powerBehavior := *g.gamePower
+	power := powerBehavior.Power(g.games)
+
+	return power
 }
 
 /*
@@ -140,14 +152,6 @@ func (p stdPowerBehavior) Power(gameRounds *[]utility.GameRound) int {
 
 }
 
-/*
-Calculates a power for a "game"
-*/
-func (g rgbDiceGame) power() int {
-	// TODO: Implement me
-	return 1
-}
-
 func SolveDayTwo(input *[]string, part int) {
 
 	if part == 1 {
@@ -162,23 +166,27 @@ func SolveDayTwo(input *[]string, part int) {
 
 func solvePartOne(input *[]string) {
 	fmt.Println("--- Solving Day Two - Part One! ---")
-	// TODO: Implement me
-	for _, inputStr := range *input {
-		gameId := parseGameId(inputStr)
-		fmt.Println(gameId)
-	}
+	/*
+		// TODO: Implement me
+		for _, inputStr := range *input {
+			gameId := parseGameId(inputStr)
+			fmt.Println(gameId)
+		}
 
-	// Build validator object
-	var validator utility.Validator
-	validator = rgbValidator{
-		redMax:   12,
-		greenMax: 13,
-		blueMax:  14,
-	}
+		// Build validator object
+		var validator utility.Validator
+		validator = rgbValidator{
+			redMax:   12,
+			greenMax: 13,
+			blueMax:  14,
+		}
+
+		// Build a list of Games
+		gamesPtr := parseGames(input, &validator)
+	*/
 
 	// Build a list of Games
-	gamesPtr := parseGames(input, &validator)
-
+	gamesPtr := buildGamesList(input)
 	// Iterate through parsed games and filter gameIds for valid games
 	validGameIds := make([]int, 0)
 	for _, gamePtr := range *gamesPtr {
@@ -204,14 +212,56 @@ func solvePartOne(input *[]string) {
 
 func solvePartTwo(input *[]string) {
 	fmt.Println("--- Solving Day Two - Part Two! ---")
-	// TODO: Implement me
+
+	// Build a list of Games
+	gamesPtr := buildGamesList(input)
+	// Iterate through games collection and grab "powers"
+	gamePowers := make([]int, 0)
+	for _, gamePtr := range *gamesPtr {
+		gameInfo := *gamePtr.Info()
+		gamePower, err := strconv.Atoi(gameInfo["power"])
+		if err != nil {
+			panic(err)
+		}
+		gamePowers = append(gamePowers, gamePower)
+
+	}
+
+	// Calc game id sum
+	powerSum := utility.SumNumbers(&gamePowers)
+	fmt.Println("Sum of the powers of game sets: ", powerSum)
+}
+
+func buildGamesList(input *[]string) *[]utility.Game {
+	for _, inputStr := range *input {
+		gameId := parseGameId(inputStr)
+		fmt.Println(gameId)
+	}
+
+	// Build validator object
+	var validator utility.Validator
+	validator = rgbValidator{
+		redMax:   12,
+		greenMax: 13,
+		blueMax:  14,
+	}
+
+	// Build PowerBehavior object
+	var powerBehavior utility.PowerBehavior
+	powerBehavior = stdPowerBehavior{colors: []string{"red", "green", "blue"}}
+
+	// Build a list of Games and return
+	gamesPtr := parseGames(input, &validator, &powerBehavior)
+
+	return gamesPtr
 }
 
 /*
 Iterate through game metadata input strings and build a list of Game objects
 that implement the utility.Game interface
 */
-func parseGames(input *[]string, validator *utility.Validator) *[]utility.Game {
+func parseGames(input *[]string, validator *utility.Validator,
+	powerBehavior *utility.PowerBehavior) *[]utility.Game {
 	// Parse a list of Games from input strings
 	games := make([]utility.Game, 0)
 	for _, inputStr := range *input {
@@ -222,6 +272,7 @@ func parseGames(input *[]string, validator *utility.Validator) *[]utility.Game {
 			gameId:    gameId,
 			games:     gameRoundsPtr,
 			validator: validator,
+			gamePower: powerBehavior,
 		}
 		games = append(games, game)
 	}

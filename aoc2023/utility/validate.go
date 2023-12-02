@@ -14,7 +14,7 @@ type GameRound interface {
 }
 
 type PowerBehavior interface {
-	Power() int
+	Power(*[]GameRound) int
 }
 
 /*
