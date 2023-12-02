@@ -5,8 +5,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/dlclark/regexp2"
 )
 
 func SolveDayOne(input *[]string, part int) {
@@ -42,7 +40,6 @@ func solvePartTwo(input *[]string) {
 	digitsMapPtr := createWordIntMap()
 
 	// Get all the calibration partOneNumbers
-	// partTwoRegex := "((?=(\\d))|(?=(one))|(?=(two))|(?=(three))|(?=(four))|(?=(five))|(?=(six))|(?=(seven))|(?=(eight))|(?=(nine)))"
 	partTwoRegex := "(\\d|one|two|three|four|five|six|seven|eight|nine)"
 	partTwoNumbers := calibrationNumbers(input, partTwoRegex, digitsMapPtr)
 
@@ -97,16 +94,6 @@ func calibrationNumber(inputStr string, regexPattern string, digitsMap *map[stri
 	return combinedNum
 }
 
-func regexp2FindAllString(re *regexp2.Regexp, s string) []string {
-	var matches []string
-	m, _ := re.FindStringMatch(s)
-	for m != nil {
-		matches = append(matches, m.String())
-		m, _ = re.FindNextMatch(m)
-	}
-	return matches
-}
-
 /*
 *
 
@@ -138,6 +125,8 @@ func findOverlappingStrings(inputStr string, regexPattern string) *[]string {
 	return &matches
 }
 
+// This is a utility function to reverse a string. Could have been potentially useful but was ultimately unneeded
+// TODO: Refactor this into a utility package for reuse
 func reverseString(inputString string) string {
 	// Convert string to runes
 	strRunes := []rune(inputString)
@@ -149,9 +138,7 @@ func reverseString(inputString string) string {
 		reverseString.WriteRune(c)
 	}
 
-	// for _, c := range inputString {
-	// 	reverseString.WriteRune(c)
-	// }
+	// Build reverse string with go's string builder
 	reversedString := reverseString.String()
 	return reversedString
 }
@@ -165,6 +152,7 @@ func sumNumbers(numbers *[]int) int {
 	return sum
 }
 
+// This parses "word" digits into single digit strings.
 func parseNumbers(numbers *[]string, digitsMapPtr *map[string]string) *[]string {
 	// Fix
 	// Derefence digitsMap
@@ -178,6 +166,7 @@ func parseNumbers(numbers *[]string, digitsMapPtr *map[string]string) *[]string 
 	return &parsedNumbers
 }
 
+// Utility function to build a map that maps both single digit and "word" strings to single digit strings
 func createWordIntMap() *map[string]string {
 	// initialize number word to digit map
 	digitsMap := map[string]string{
