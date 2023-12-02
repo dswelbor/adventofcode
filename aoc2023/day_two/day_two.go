@@ -3,6 +3,7 @@ package day_two
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -95,13 +96,48 @@ func (g rgbDiceGame) valid() bool {
 	return valid
 }
 
-type minValidPowerBehavior struct {
+/*
+Implements the PowerBehavior where power is determined as the product (multiplication)
+of each min colot count required for all GameRounds in a Game to be valid.
+*/
+type stdPowerBehavior struct {
 	colors []string
 }
 
-func (p minValidPowerBehavior) Power(gameRounds *[]utility.GameRound) int {
-	// TODO: Implement me
-	return 1
+// PowerBehavior.Power() implementation:
+func (p stdPowerBehavior) Power(gameRounds *[]utility.GameRound) int {
+	// Create map for counts of each color in game rounds - init with all possible colors
+	colorCountMap := make(map[string][]int)
+	for _, color := range p.colors {
+		colorCountMap[color] = []int{0}
+	}
+
+	// Iterate through game rounds and map counts for each seen color
+	for _, gameRound := range *gameRounds {
+		// dynamically grab color: count from each key: value in the game round info
+		for color, countStr := range *gameRound.Info() {
+			count, _ := strconv.Atoi(countStr)
+			colorCountMap[color] = append(colorCountMap[color], count)
+		}
+	}
+
+	// create map for min required count per color required for game to be valid
+	// set max found (min required) for each color
+	maxColorMap := make(map[string]int)
+	for color, counts := range colorCountMap {
+		// do max to get min required count for each folor
+		maxCount := slices.Max(counts)
+		maxColorMap[color] = maxCount
+	}
+
+	// Calculate power (multiply each min required color count)
+	power := 1
+	for _, count := range maxColorMap {
+		power *= count
+	}
+
+	return power
+
 }
 
 /*
