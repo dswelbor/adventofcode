@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/dswelbor/adventofcode/aoc2023/utility"
 )
 
 func SolveDayOne(input *[]string, part int) {
@@ -27,7 +29,7 @@ func solvePartOne(input *[]string) {
 	// fmt.Println(*numbers)
 
 	// Sum all the calibration numbers
-	partOneSum := sumNumbers(partOneNumbers)
+	partOneSum := utility.SumNumbers(partOneNumbers)
 
 	// Print the sum
 	resultStr := "Calibration Number Sum: " + strconv.Itoa(partOneSum)
@@ -44,7 +46,7 @@ func solvePartTwo(input *[]string) {
 	partTwoNumbers := calibrationNumbers(input, partTwoRegex, digitsMapPtr)
 
 	// Sum all the calibration numbers
-	partTwoSum := sumNumbers(partTwoNumbers)
+	partTwoSum := utility.SumNumbers(partTwoNumbers)
 
 	// Print the sum
 	resultStr := "Calibration Number Sum: " + strconv.Itoa(partTwoSum)
@@ -119,7 +121,7 @@ func findOverlappingStrings(inputStr string, regexPattern string) *[]string {
 		matches = append(matches, match)
 
 		// trim the testStr to get overlapping matches
-		inputStr = inputStr[i+1 : len(inputStr)]
+		inputStr = inputStr[i+1:]
 		matchIndex = reg.FindStringIndex(inputStr)
 	}
 	return &matches
@@ -141,15 +143,6 @@ func reverseString(inputString string) string {
 	// Build reverse string with go's string builder
 	reversedString := reverseString.String()
 	return reversedString
-}
-
-// Add up all the calibration numbers and return their sum
-func sumNumbers(numbers *[]int) int {
-	sum := 0
-	for _, num := range *numbers {
-		sum += num
-	}
-	return sum
 }
 
 // This parses "word" digits into single digit strings.
