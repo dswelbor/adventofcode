@@ -51,7 +51,7 @@ type rgbDiceRound struct {
 }
 
 // convenience function to return dice round info map
-func (r *rgbDiceRound) info() *map[string]string {
+func (r rgbDiceRound) Info() *map[string]string {
 	infoMap := map[string]string{
 		"red":   strconv.Itoa(r.red),
 		"green": strconv.Itoa(r.green),
@@ -65,7 +65,7 @@ type rgbDiceGame struct {
 	gameId    string
 	validator *utility.Validator
 	gamePower *utility.PowerBehavior
-	games     *[]rgbDiceRound
+	games     *[]utility.GameRound
 }
 
 func (g rgbDiceGame) Id() string {
@@ -86,7 +86,7 @@ func (g rgbDiceGame) valid() bool {
 	valid := true
 	for _, round := range *g.games {
 		// Grab rgbDiceRound info map
-		roundInfoPtr := round.info()
+		roundInfoPtr := round.Info()
 
 		// Set game round info and validate
 		gameValidator := *g.validator // derefence validator flyweight
@@ -208,11 +208,12 @@ func parseGameId(inputStr string) string {
 	return idStr // ex. '14' from 'Game 14:...' string
 }
 
-func parseRounds(inputStr string) *[]rgbDiceRound {
+func parseRounds(inputStr string) *[]utility.GameRound {
 	roundStrings := strings.Split(inputStr, "; ")
 
 	// parse rgbDiceRound objs from color and count from each round
-	rounds := make([]rgbDiceRound, 0)
+	// rounds := make([]rgbDiceRound, 0)
+	rounds := make([]utility.GameRound, 0)
 	for _, roundStr := range roundStrings {
 		// get rgbDiceRound from game round string - add to list
 		roundPtr := parseRound(roundStr)
@@ -224,14 +225,16 @@ func parseRounds(inputStr string) *[]rgbDiceRound {
 	return &rounds
 }
 
-func parseRound(roundStr string) *rgbDiceRound {
+func parseRound(roundStr string) *utility.GameRound {
 	// Grab a list of rounds in a given game
 	colorCountPattern := "\\d+ (green|red|blue)"
 	colorCountReg := regexp.MustCompile(colorCountPattern)
 	colorCountStrings := colorCountReg.FindAllString(roundStr, -1)
 
 	// iterate trough color count string - build rgbDiceRound obj
-	round := new(rgbDiceRound)
+	// var round utility.GameRound
+	//round := new(rgbDiceRound)
+	roundColorMap := map[string]int{"red": 0, "green": 0, "blue": 0}
 	for _, colorCountStr := range colorCountStrings {
 		// grab qty and color details
 		qtyColorTuple := strings.Split(colorCountStr, " ")
@@ -239,16 +242,25 @@ func parseRound(roundStr string) *rgbDiceRound {
 		color := qtyColorTuple[1]
 		switch color {
 		case "red":
-			round.red = qty
+			roundColorMap["red"] = qty
 		case "green":
-			round.green = qty
+			roundColorMap["green"] = qty
 		case "blue":
-			round.blue = qty
+			roundColorMap["blue"] = qty
 		default:
 			panic("Error parsing color and qty")
 		}
+
+	}
+
+	// Create new GameRound object from roundColorMap
+	var round utility.GameRound
+	round = rgbDiceRound{
+		red:   roundColorMap["red"],
+		green: roundColorMap["green"],
+		blue:  roundColorMap["blue"],
 	}
 
 	// rgbDiceRound populated - return it
-	return round
+	return &round
 }
