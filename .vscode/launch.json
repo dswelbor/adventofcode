@@ -11,6 +11,14 @@
             "mode": "auto",
             "program": "${workspaceFolder}/aoc2023/runner.go",
             "args": ["-day=1", "-file=data/day_one_part_one_ex.txt", "-part=1"]
+        },
+        {
+            "name": "Launch aoc2023 day two part two normal input",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/aoc2023/runner.go",
+            "args": ["-day=2", "-file=data/day_two_input.txt", "-part=2"]
         }
     ]
 }
