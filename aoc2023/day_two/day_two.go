@@ -166,28 +166,11 @@ func SolveDayTwo(input *[]string, part int) {
 
 func solvePartOne(input *[]string) {
 	fmt.Println("--- Solving Day Two - Part One! ---")
-	/*
-		// TODO: Implement me
-		for _, inputStr := range *input {
-			gameId := parseGameId(inputStr)
-			fmt.Println(gameId)
-		}
-
-		// Build validator object
-		var validator utility.Validator
-		validator = rgbValidator{
-			redMax:   12,
-			greenMax: 13,
-			blueMax:  14,
-		}
-
-		// Build a list of Games
-		gamesPtr := parseGames(input, &validator)
-	*/
 
 	// Build a list of Games
 	gamesPtr := buildGamesList(input)
-	// Iterate through parsed games and filter gameIds for valid games
+
+	// Iterate through parsed games and add valid gameIds to list
 	validGameIds := make([]int, 0)
 	for _, gamePtr := range *gamesPtr {
 		gameId, err := strconv.Atoi(gamePtr.Id())
@@ -197,7 +180,7 @@ func solvePartOne(input *[]string) {
 		gameStatus := *gamePtr.Info()
 		valid, err := strconv.ParseBool(gameStatus["valid"])
 		if err == nil && valid {
-			fmt.Println("[DEBUG]: GameID: " + strconv.Itoa(gameId) + " is valid")
+			// fmt.Println("[DEBUG]: GameID: " + strconv.Itoa(gameId) + " is valid")
 			validGameIds = append(validGameIds, gameId)
 		}
 
@@ -207,7 +190,6 @@ func solvePartOne(input *[]string) {
 	idSum := utility.SumNumbers(&validGameIds)
 
 	fmt.Println("Valid Game IDs Sum: ", strconv.Itoa(idSum))
-	// fmt.Println("[DEBUG]: ", gamesPtr)
 }
 
 func solvePartTwo(input *[]string) {
@@ -232,12 +214,12 @@ func solvePartTwo(input *[]string) {
 	fmt.Println("Sum of the powers of game sets: ", powerSum)
 }
 
+/*
+Utility function builds a list of Game objects. Handles creating a Validator and
+PowerBehavior objects supporting the strategy pattern. Assumes a game consists of
+red, green, and blue cubes/dice
+*/
 func buildGamesList(input *[]string) *[]utility.Game {
-	for _, inputStr := range *input {
-		gameId := parseGameId(inputStr)
-		fmt.Println(gameId)
-	}
-
 	// Build validator object
 	var validator utility.Validator
 	validator = rgbValidator{
@@ -282,15 +264,12 @@ func parseGames(input *[]string, validator *utility.Validator,
 
 func parseGameId(inputStr string) string {
 	// Parse out Game \d*: from input str
-	fmt.Println("[DEBUG]: ", inputStr)
 	idReg := regexp.MustCompile("Game \\d*:")
 	gameIdStr := idReg.FindString(inputStr)
-	fmt.Println("[DEBUG]: ", gameIdStr)
 
 	// Parse digit from Game \d*: string
 	digitReg := regexp.MustCompile("\\d+")
 	idStr := digitReg.FindString(gameIdStr)
-	fmt.Println("[DEBUG]: ", idStr)
 
 	return idStr // ex. '14' from 'Game 14:...' string
 }
@@ -299,7 +278,6 @@ func parseRounds(inputStr string) *[]utility.GameRound {
 	roundStrings := strings.Split(inputStr, "; ")
 
 	// parse rgbDiceRound objs from color and count from each round
-	// rounds := make([]rgbDiceRound, 0)
 	rounds := make([]utility.GameRound, 0)
 	for _, roundStr := range roundStrings {
 		// get rgbDiceRound from game round string - add to list
@@ -319,8 +297,6 @@ func parseRound(roundStr string) *utility.GameRound {
 	colorCountStrings := colorCountReg.FindAllString(roundStr, -1)
 
 	// iterate trough color count string - build rgbDiceRound obj
-	// var round utility.GameRound
-	//round := new(rgbDiceRound)
 	roundColorMap := map[string]int{"red": 0, "green": 0, "blue": 0}
 	for _, colorCountStr := range colorCountStrings {
 		// grab qty and color details

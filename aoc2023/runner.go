@@ -20,10 +20,9 @@ func main() {
 	flag.Parse()
 
 	// print cli args
-
 	fmt.Println("day:", *dayPtr)
-	fmt.Println("file:", *filepathPtr)
 	fmt.Println("part: ", *partPtr)
+	fmt.Println("file:", *filepathPtr)
 	inputPtr := readInputFile(filepathPtr)
 
 	// Execute day (and part) by passed cli args
