@@ -50,7 +50,25 @@ func solvePartOne(input *[]string) {
 func solvePartTwo(input *[]string) {
 	fmt.Println("--- Solving Day Three - Part Two! ---")
 	// TODO: Implement me
+	// Map "symbols"
+	symbolPattern := "[\\@\\*\\&\\%\\#\\/\\+\\=\\$\\!\\^\\(\\)\\-\\_]"
+	symbols := mapSymbols(input, symbolPattern)
+	// init validator - aware of symbol map
+	// validator := StdPartValidator{symbols: symbols}
+	// Get list of Parts
+	partPattern := "\\d+"
+	parts := listParts(input, partPattern, nil)
 
+	// build reverse "gear" map - and build gears list
+	revGearParts := buildReverseGearMap(parts, symbols)
+	gears := listValidGears(revGearParts)
+
+	// grab gear ratios and sum ratios
+	gearRatios := listGearRatios(gears)
+	gearRatioSum := utility.SumNumbers(gearRatios)
+
+	// Print sum of gear ratios
+	fmt.Println("Sum of Gear Ratios: ", gearRatioSum)
 }
 
 func findAdjacentCoords(rowIndex int, colIndices []int) *[][]int {
@@ -197,4 +215,96 @@ func doTheStuff(input *[]string) {
 			fmt.Printf("%c", r)
 		}
 	}
+}
+
+// Goes through a builds a
+func buildReverseGearMap(parts *[]Part, symbols *SymbolCollection) *[][][]Part {
+	// init reverse map of symbols that match criteria for gear "*" symbol and adjacent parts
+	revGearPartsPtr := initReverseGearMap(symbols)
+	revGearParts := *revGearPartsPtr
+	// iterate through parts list
+	for _, part := range *parts {
+		adjCoords := part.adjCoords
+		// Iterate through adjacent coords
+		for _, coord := range *adjCoords {
+			// try to fetch adjacent symbol
+			row := coord[0]
+			col := coord[1]
+			symbol := symbols.Symbol(row, col)
+			// check if Part is adj to gear "*" symbol
+			if symbol == "*" {
+				// current part is adjacent to gear "*" symbol
+				// add to list of parts for that row, col
+				coordParts := revGearParts[row][col]
+				coordParts = append(coordParts, part)
+				revGearParts[row][col] = coordParts
+				//revGearParts[row][col]
+			}
+		}
+
+	}
+
+	// we have a (row, col): []Part reverse map
+	return revGearPartsPtr
+}
+
+// utility function that initializes a (row, col): part list collection. This can be
+// used to essentially reverse map symbols to a collection of adjacent parts
+func initReverseGearMap(symbols *SymbolCollection) *[][][]Part {
+	rowCount := len((*symbols.symbolCoords))
+	colCount := 0
+	if rowCount > 0 {
+		colCount = len((*symbols.symbolCoords)[0])
+	}
+	revGearParts := make([][][]Part, rowCount) // init list of rows
+	for row := 0; row < rowCount; row++ {
+		newRow := make([][]Part, colCount)
+		revGearParts[row] = newRow
+		// we assume that each element is by default an empty []Part
+	}
+
+	return &revGearParts
+}
+
+func listValidGears(revGearParts *[][][]Part) *[]GearPart {
+	// init list of "gears"
+	gears := make([]GearPart, 0)
+
+	// iterate each row
+	for rowIndex, row := range *revGearParts {
+		// iterate each column in row
+		for colIndex, partList := range row {
+			// check count of adjacent parts
+			if len(partList) == 2 {
+				// current symbol has exactly 2 adjacent parts - is a gear
+				parts := make([]Part, 2)
+				for i, part := range partList {
+					parts[i] = part
+				}
+				gear := GearPart{
+					parts:  &parts,
+					row:    rowIndex,
+					col:    colIndex,
+					symbol: "*",
+				}
+				gears = append(gears, gear)
+			}
+		}
+	}
+
+	// finished grabbing gears
+	return &gears
+}
+
+func listGearRatios(gears *[]GearPart) *[]int {
+	// init list of gear rations
+	gearRatios := make([]int, 0)
+
+	// iterate through gears, add ratio() value to list
+	for _, gear := range *gears {
+		ratio := gear.Ratio()
+		gearRatios = append(gearRatios, ratio)
+	}
+
+	return &gearRatios
 }

@@ -31,6 +31,30 @@ func CreateSymbolCollection(rowCount int, colCount int) *SymbolCollection {
 	return &symbolCollection
 }
 
+func (s SymbolCollection) Symbol(row int, col int) string {
+	// iterate through part adjc coords
+	symbolMap := *s.symbolCoords
+
+	// set row and col max indices
+	rowMax := len(symbolMap)
+	colMax := 0
+	if rowMax > 0 {
+		colMax = len(symbolMap[0])
+	}
+
+	// handle index out of bounds errors
+	if row >= 0 && row < rowMax && col >= 0 && col < colMax {
+		symbol := symbolMap[row][col]
+		if len(symbol) > 0 {
+			// a symbol was found in the adj coords list
+			return symbol
+		}
+	}
+
+	// didn't match row, col indices, return default empty string
+	return ""
+}
+
 type StdPartValidator struct {
 	symbols *SymbolCollection
 }
@@ -59,4 +83,19 @@ func (v StdPartValidator) Valid(part *Part) bool {
 
 	// symbol was matched in part adj coords
 	return false
+}
+
+type GearPart struct {
+	parts  *[]Part
+	row    int
+	col    int
+	symbol string
+}
+
+func (g GearPart) Ratio() int {
+	product := 1
+	for _, part := range *g.parts {
+		product = product * part.number
+	}
+	return product
 }
