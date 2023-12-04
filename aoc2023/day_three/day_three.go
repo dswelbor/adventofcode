@@ -45,6 +45,15 @@ func solvePartOne(input *[]string) {
 
 	// fmt.Println(symbols)
 	// fmt.Println(parts)
+
+	// TODO: Refactor as a graph. a "Part" should be a node. SymbolCollection can
+	// remain the same - though a map[string] string might make more sense or a
+	// map[string]Symbol would be better, where a Symbol has a symbol, row, and col
+	// attributes. A Part should have edges to Symbols. To handle part 2, build a
+	// reverse graph of Symbol -> Parts. Essentially there are 3 kinds of nodes: Part,
+	// Symbol, and Gear, though a Gear is a special kind of Symbol node.
+
+	// A Part should have a list of
 }
 
 func solvePartTwo(input *[]string) {
