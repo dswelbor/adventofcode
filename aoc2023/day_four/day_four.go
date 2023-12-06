@@ -58,6 +58,19 @@ func solvePartOne(input *[]string) {
 
 func solvePartTwo(input *[]string) {
 	fmt.Println("--- Solving Day Four - Part Two! ---")
+
+	// Build builder
+	var deckBuilder DeckBuilder
+	deckBuilder = &DeckBuilderConcrete{winBehaviorType: "cards"}
+	// Call Construct (usually abstracted in a Director interface)
+	deck := ConstructGameCardDeck(deckBuilder, input)
+
+	// Iterate through cards in collection and get points
+	points := 0
+	for _, gameCard := range *deck.cards {
+		points += gameCard.Win()
+	}
+	fmt.Println("Sum of win points: ", points)
 }
 
 func listCardPoints(input *[]string) *[]int {

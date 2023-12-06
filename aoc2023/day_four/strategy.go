@@ -49,8 +49,8 @@ type CardCopyWinBehavior struct {
 }
 
 /*
-Calculates score as num of cards won for this card, and recursively, the number of cards
-won from those won card copies. Cards won are selected in an offset range from current
+Calculates score as the sum of 1 (this card), and recursively the number of cards
+won from won card copies. Cards won are selected in an offset range from current
 game card id.
 */
 func (w *CardCopyWinBehavior) Win(matchCount int) int {
@@ -62,7 +62,8 @@ func (w *CardCopyWinBehavior) Win(matchCount int) int {
 		wonCard := w.cardDeck.Get(offsetId)
 		wonCards = append(wonCards, *wonCard)
 	}
-	curScore := len(wonCards) // we won 0 or more cards for this card - include in score
+	// curScore := len(wonCards) // we won 0 or more cards for this card - include in score
+	curScore := 1 // we have this card - count it torwards the score
 
 	// Iterate through won cards and recursively get scores for won cards
 	recursiveScore := 0
