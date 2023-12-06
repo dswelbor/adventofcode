@@ -91,6 +91,8 @@ func solvePartOne(input *[]string) {
 // Entry point for day 5 part 2 solution
 func solvePartTwo(input *[]string) {
 	fmt.Println("--- Solving Day Five - Part Two! ---")
+	minLocId := rangedLowestLocation(input)
+	fmt.Println("Lowest Location Id for seeds ranges: ", minLocId)
 }
 
 func naiveLowestLocation(input *[]string) int {
@@ -112,6 +114,67 @@ func naiveLowestLocation(input *[]string) int {
 	}
 	// lowest location id found
 	return minLocId
+}
+
+func rangedLowestLocation(input *[]string) int {
+	// get seed ids - we assume this is the first line of input
+	numReg := regexp.MustCompile("\\d+")
+	seedIdStrings := numReg.FindAllString((*input)[0], -1)
+	seedIds := utility.ListAtoi(&seedIdStrings)
+	seedIdRanges := parseSeedIdRanges(seedIds)
+
+	// get ordered list of translators
+	translators := initTranslators(input)
+
+	// map seed ids to location ids and find lowest location id
+	seedLocMap := translateSeedRanges(seedIdRanges, translators)
+	minLocId := math.MaxInt
+	for _, locId := range *seedLocMap {
+		if locId < minLocId {
+			minLocId = locId
+		}
+	}
+	// lowest location id found
+	return minLocId
+}
+
+// Parses out a collection of seed ranges from list of numbers. Assumes every
+// even-indexed element is an inclusive range min and each odd-indexed element is
+// a positive offset. The sum of these two numbers gives an exclusive max for the range
+// in the format: [incMin, incMin + offset)
+func parseSeedIdRanges(seedNumbersPtr *[]int) *[][]int {
+	seedNumbers := *seedNumbersPtr
+	// iterate numers 2 at a time - build ranges
+	seedNumCount := len(seedNumbers)
+	seedRanges := make([][]int, seedNumCount/2)
+	for i := 0; i < seedNumCount; i += 2 {
+		// calc min and max for seed id range
+		incMin := seedNumbers[i]
+		offset := seedNumbers[i+1]
+		excMax := incMin + offset
+		// create seed range and add
+		seedRange := []int{incMin, excMax}
+		seedRanges[i/2] = seedRange
+	}
+	// We've got our list of seed ranges
+	return &seedRanges
+}
+
+// Turns an id range with an inclusive min and exclusive max [minId, maxId) into a list
+// of seed ids
+func parseSeedIdsFromRanges(seedRange *[]int) *[]int {
+	// parse inclusive min and exclusive max from range
+	incMin := (*seedRange)[0]
+	excMax := (*seedRange)[1]
+	length := excMax - incMin
+	// blow out id list
+	seedIds := make([]int, length)
+	for offset := 0; offset < length; offset++ {
+		seedId := incMin + offset
+		seedIds[offset] = seedId
+	}
+	// we've got our seed ids
+	return &seedIds
 }
 
 // creates an ordered list of translators to go from seed id to location id
@@ -168,6 +231,21 @@ func translateSeeds(seedIds *[]int, translators *[]Translator) *map[int]int {
 	for _, seedId := range *seedIds {
 		locId := translateSeed(seedId, translators)
 		seedLocMap[seedId] = locId
+	}
+	return &seedLocMap
+}
+
+// Helper function that iteratively maps seedId to locationId
+func translateSeedRanges(seedIdRangesPtr *[][]int, translators *[]Translator) *map[int]int {
+	// iterate through the list of seed ids and map seedId: locationId
+	seedLocMap := make(map[int]int)
+	for _, seedIdRange := range *seedIdRangesPtr {
+		seedIds := parseSeedIdsFromRanges(&seedIdRange)
+		partSeedLocMap := translateSeeds(seedIds, translators)
+		// got the map - lets merge it into seedLocMap
+		for seedId, locId := range *partSeedLocMap {
+			seedLocMap[seedId] = locId
+		}
 	}
 	return &seedLocMap
 }
