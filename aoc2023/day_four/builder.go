@@ -29,6 +29,17 @@ type DeckBuilderConcrete struct {
 // Takes an input string, creates WinBehavior, and creates GameCard with that behavior.
 // iteratively adds the new object to the GameCardDeck that is being built
 func (b *DeckBuilderConcrete) BuildCard(cardInputStr string) {
+	// Handle initializing the deck
+	if b.deck == nil {
+		// initialize GameCardDeck an empty list of GameCards
+		deckCards := make([]GameCard, 0)
+		deck := &GameCardDeck{
+			cards: &deckCards,
+		}
+		// set deck in builder
+		b.deck = deck
+	}
+
 	// split Card # from numbers on ":"
 	allNumbers := strings.Split(cardInputStr, ":")
 	// Grab id
