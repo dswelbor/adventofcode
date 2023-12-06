@@ -63,7 +63,6 @@ func (b *DeckBuilderConcrete) BuildCard(cardInputStr string) {
 
 	// create WinBehavior for GameCard
 	var winBehavior *WinBehavior
-	// pointsBehavior = &PointsWinBehavior{base: 2}
 	winBehavior = b.createWinBehavior(gameCardId)
 
 	// Create GameCard and add to GameCardDeck being built
