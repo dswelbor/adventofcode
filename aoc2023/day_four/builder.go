@@ -75,6 +75,7 @@ func (b *DeckBuilderConcrete) BuildCard(cardInputStr string) {
 	}
 	gameCards := *b.deck.cards
 	gameCards = append(gameCards, *gameCard)
+	b.deck.cards = &gameCards
 }
 
 // Returns the built GameCardDeck collection
