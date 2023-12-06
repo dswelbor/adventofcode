@@ -2,10 +2,7 @@ package day_four
 
 import (
 	"fmt"
-	"math"
-	"regexp"
 	"strconv"
-	"strings"
 )
 
 type MatchVisitor struct {
@@ -14,19 +11,7 @@ type MatchVisitor struct {
 	points int
 }
 
-func (v *MatchVisitor) Visit(match bool) int {
-	points := math.Pow(float64(v.base), float64(v.power))
-	if match {
-		v.power += 1
-		v.points = int(points)
-	}
-	return int(points)
-}
-
-func (v *MatchVisitor) Points() int {
-	return v.points
-}
-
+// High level entry Point for Day 4 solution
 func SolveDayFour(input *[]string, part int) {
 
 	if part == 1 {
@@ -39,6 +24,7 @@ func SolveDayFour(input *[]string, part int) {
 
 }
 
+// Entry point for day 4 part 1 solution
 func solvePartOne(input *[]string) {
 	fmt.Println("--- Solving Day Four - Part One! ---")
 
@@ -56,6 +42,7 @@ func solvePartOne(input *[]string) {
 	fmt.Println("Sum of win points: ", points)
 }
 
+// Entry point for day 4 part 2 solution
 func solvePartTwo(input *[]string) {
 	fmt.Println("--- Solving Day Four - Part Two! ---")
 
@@ -71,70 +58,6 @@ func solvePartTwo(input *[]string) {
 		points += gameCard.Win()
 	}
 	fmt.Println("Sum of win points: ", points)
-}
-
-func listCardPoints(input *[]string) *[]int {
-	// init points list and visitor for tracking points across cards
-	pointsList := make([]int, 0)
-	for _, cardInputStr := range *input {
-		// split Card # from numbers on ":"
-		allNumbers := strings.Split(cardInputStr, ":")
-		// split winning #'s from scratched numbers on "|"
-		numbers := strings.Split(allNumbers[1], "|")
-
-		// Grab a list of winning numbers and map it
-		numReg := regexp.MustCompile("\\d+")
-		winNumStrings := numReg.FindAllString(numbers[0], -1)
-		winMap := make(map[int]bool)
-		for _, numStr := range winNumStrings {
-			num, err := strconv.Atoi(numStr)
-			if err != nil {
-				fmt.Println("[ERROR] Error parsing: \"", numStr, "\" error: ", err)
-			} else {
-				// no error - normal case
-				winMap[num] = true
-			}
-		}
-
-		// List scratched off numbers
-		numStrings := numReg.FindAllString(numbers[1], -1)
-
-		// visit each scratched off number, and if matched, square current points
-		// points := 0
-		/*
-			visitor := MatchVisitor{
-				base:  2,
-				power: 0,
-			}
-		*/
-		var pointsBehavior WinBehavior
-		pointsBehavior = &PointsWinBehavior{base: 2}
-		matchCount := 0
-
-		for _, numStr := range numStrings {
-			// init match flag
-			match := false
-
-			// parse number string into int
-			num, err := strconv.Atoi(numStr)
-			if err != nil {
-				fmt.Println("[ERROR] Error parsing: \"", numStr, "\" error: ", err)
-			} else {
-				// no error - normal case
-				match = winMap[num]
-				// TODO: Refactor in the visit behavior
-				if match {
-					// visitor.Visit(match)
-					matchCount += 1
-				}
-			}
-		}
-		// points = visitor.Points()
-		points := pointsBehavior.Win(matchCount)
-		pointsList = append(pointsList, points)
-
-	}
-	return &pointsList
 }
 
 // Utility function acts as the Director with a Construct. In more complex
