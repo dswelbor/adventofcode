@@ -42,10 +42,10 @@ func (c *GameCard) matchCount() int {
 	matchCount := 0
 	winMap := *c.winMap
 
+	// iterate through GameCard numbers - increment count on matches to winning numbers
 	for _, numStr := range *c.numStrings {
 		// init match flag
 		match := false
-
 		// parse number string into int
 		num, err := strconv.Atoi(numStr)
 		if err != nil {
