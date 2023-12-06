@@ -11,16 +11,22 @@ import (
 )
 
 type MatchVisitor struct {
-	power int
-	base  int
+	power  int
+	base   int
+	points int
 }
 
 func (v *MatchVisitor) Visit(match bool) int {
 	points := math.Pow(float64(v.base), float64(v.power))
 	if match {
 		v.power += 1
+		v.points = int(points)
 	}
 	return int(points)
+}
+
+func (v *MatchVisitor) Points() int {
+	return v.points
 }
 
 func SolveDayFour(input *[]string, part int) {
@@ -42,6 +48,15 @@ func solvePartOne(input *[]string) {
 	// calc sum from collected winning points
 	pointSum := utility.SumNumbers(points)
 	fmt.Println("Sum of win points: ", pointSum)
+
+	// Test with strategy pattern WinBehavior
+	var pointsBehavior WinBehavior
+	pointsBehavior = &PointsWinBehavior{base: 2}
+	testPoints := pointsBehavior.Win(4)
+	testNoPoints := pointsBehavior.Win(0)
+
+	fmt.Println("Test result with 4 matches. Expect 8. Result: ", testPoints)
+	fmt.Println("Test result with 0 matches. Expect 0. Result: ", testNoPoints)
 }
 
 func solvePartTwo(input *[]string) {
@@ -92,11 +107,12 @@ func listCardPoints(input *[]string) *[]int {
 				// no error - normal case
 				match = winMap[num]
 				// TODO: Refactor in the visit behavior
-				if match {
-					points = visitor.Visit(match)
-				}
+				// if match {
+				visitor.Visit(match)
+				// }
 			}
 		}
+		points = visitor.Points()
 		pointsList = append(pointsList, points)
 
 	}
