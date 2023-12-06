@@ -90,11 +90,17 @@ func listCardPoints(input *[]string) *[]int {
 		numStrings := numReg.FindAllString(numbers[1], -1)
 
 		// visit each scratched off number, and if matched, square current points
-		points := 0
-		visitor := MatchVisitor{
-			base:  2,
-			power: 0,
-		}
+		// points := 0
+		/*
+			visitor := MatchVisitor{
+				base:  2,
+				power: 0,
+			}
+		*/
+		var pointsBehavior WinBehavior
+		pointsBehavior = &PointsWinBehavior{base: 2}
+		matchCount := 0
+
 		for _, numStr := range numStrings {
 			// init match flag
 			match := false
@@ -107,12 +113,14 @@ func listCardPoints(input *[]string) *[]int {
 				// no error - normal case
 				match = winMap[num]
 				// TODO: Refactor in the visit behavior
-				// if match {
-				visitor.Visit(match)
-				// }
+				if match {
+					// visitor.Visit(match)
+					matchCount += 1
+				}
 			}
 		}
-		points = visitor.Points()
+		// points = visitor.Points()
+		points := pointsBehavior.Win(matchCount)
 		pointsList = append(pointsList, points)
 
 	}
