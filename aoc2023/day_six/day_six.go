@@ -58,7 +58,7 @@ func (r *RaceRecord) Moves() *[]int {
 
 }
 
-// High level entry Point for Day 4 solution
+// High level entry Point for Day 6 solution
 func SolveDaySix(input *[]string, part int) {
 
 	if part == 1 {

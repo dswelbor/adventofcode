@@ -69,7 +69,7 @@ func (t *Translator) AddRange(fromStart int, toStart int, rangeLength int) {
 	t.toRanges = &toRanges
 }
 
-// High level entry Point for Day 4 solution
+// High level entry Point for Day 5 solution
 func SolveDayFive(input *[]string, part int) {
 
 	if part == 1 {
