@@ -11,6 +11,7 @@ import (
 	"github.com/dswelbor/adventofcode/aoc2023/day_five"
 	"github.com/dswelbor/adventofcode/aoc2023/day_four"
 	"github.com/dswelbor/adventofcode/aoc2023/day_one"
+	"github.com/dswelbor/adventofcode/aoc2023/day_six"
 	"github.com/dswelbor/adventofcode/aoc2023/day_three"
 	"github.com/dswelbor/adventofcode/aoc2023/day_two"
 )
@@ -40,6 +41,8 @@ func main() {
 		day_four.SolveDayFour(inputPtr, *partPtr)
 	case 5:
 		day_five.SolveDayFive(inputPtr, *partPtr)
+	case 6:
+		day_six.SolveDaySix(inputPtr, *partPtr)
 	default:
 		fmt.Println("Day: " + strconv.Itoa(*dayPtr) + " not implemented")
 	}

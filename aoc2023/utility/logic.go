@@ -8,3 +8,12 @@ func SumNumbers(numbers *[]int) int {
 	}
 	return sum
 }
+
+// Takes a list of ints and multiples all elements together
+func MultipleNumbers(numbers *[]int) int {
+	product := 1
+	for _, num := range *numbers {
+		product *= num
+	}
+	return product
+}
