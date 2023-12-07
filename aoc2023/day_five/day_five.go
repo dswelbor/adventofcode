@@ -5,6 +5,7 @@ import (
 	"math"
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/dswelbor/adventofcode/aoc2023/utility"
 )
@@ -91,8 +92,12 @@ func solvePartOne(input *[]string) {
 // Entry point for day 5 part 2 solution
 func solvePartTwo(input *[]string) {
 	fmt.Println("--- Solving Day Five - Part Two! ---")
+	// Let's time how long solution takes to complete
+	start := time.Now()
 	minLocId := rangedLowestLocation(input)
-	fmt.Println("Lowest Location Id for seeds ranges: ", minLocId)
+	elapsed := time.Since(start)
+	fmt.Println("\nComplete! Lowest Location Id for seeds ranges: ", minLocId)
+	fmt.Printf("Time elapsed: %s\n", elapsed)
 }
 
 func naiveLowestLocation(input *[]string) int {
