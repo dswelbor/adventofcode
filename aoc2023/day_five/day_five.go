@@ -127,13 +127,7 @@ func rangedLowestLocation(input *[]string) int {
 	translators := initTranslators(input)
 
 	// map seed ids to location ids and find lowest location id
-	seedLocMap := translateSeedRanges(seedIdRanges, translators)
-	minLocId := math.MaxInt
-	for _, locId := range *seedLocMap {
-		if locId < minLocId {
-			minLocId = locId
-		}
-	}
+	minLocId := minLocFromSeedRanges(seedIdRanges, translators)
 	// lowest location id found
 	return minLocId
 }
@@ -156,6 +150,7 @@ func parseSeedIdRanges(seedNumbersPtr *[]int) *[][]int {
 		seedRange := []int{incMin, excMax}
 		seedRanges[i/2] = seedRange
 	}
+	fmt.Println("[INFO] Finished parsing ", seedNumCount/2, " seedId ranges")
 	// We've got our list of seed ranges
 	return &seedRanges
 }
@@ -220,6 +215,7 @@ func initTranslators(input *[]string) *[]Translator {
 			translators = append(translators, translator)
 		}
 	}
+	fmt.Println("[INFO] Finished building ", len(translators), " translators from input")
 	// Done building ordered list of translators (translate behaviors)
 	return &translators
 }
@@ -235,21 +231,6 @@ func translateSeeds(seedIds *[]int, translators *[]Translator) *map[int]int {
 	return &seedLocMap
 }
 
-// Helper function that iteratively maps seedId to locationId
-func translateSeedRanges(seedIdRangesPtr *[][]int, translators *[]Translator) *map[int]int {
-	// iterate through the list of seed ids and map seedId: locationId
-	seedLocMap := make(map[int]int)
-	for _, seedIdRange := range *seedIdRangesPtr {
-		seedIds := parseSeedIdsFromRanges(&seedIdRange)
-		partSeedLocMap := translateSeeds(seedIds, translators)
-		// got the map - lets merge it into seedLocMap
-		for seedId, locId := range *partSeedLocMap {
-			seedLocMap[seedId] = locId
-		}
-	}
-	return &seedLocMap
-}
-
 // Helper function that takes a seed id and a list of ordered translators, and
 // translates seedId to locationId.
 func translateSeed(seedId int, translators *[]Translator) int {
@@ -261,4 +242,37 @@ func translateSeed(seedId int, translators *[]Translator) int {
 		id = locId
 	}
 	return locId
+}
+
+// Helper function that iteratively maps seedId to locationId
+func minLocFromSeedRanges(seedIdRangesPtr *[][]int, translators *[]Translator) int {
+	// iterate through the list of seed ids and map seedId: locationId
+	// seedLocMap := make(map[int]int)
+	minLocId := math.MaxInt
+	for chunkCount, seedIdRange := range *seedIdRangesPtr {
+		seedIds := parseSeedIdsFromRanges(&seedIdRange)
+		// partSeedLocMap := translateSeeds(seedIds, translators)
+		locId := minLocFromSeeds(seedIds, translators)
+		// Check and store lowest location id value
+		if locId < minLocId {
+			minLocId = locId
+		}
+		fmt.Println("[INFO] Finished chunk: ", chunkCount, " / ", len(*seedIdRangesPtr))
+	}
+	return minLocId
+}
+
+func minLocFromSeeds(seedIds *[]int, translators *[]Translator) int {
+	// iterate through the list of seed ids and map seedId: locationId
+	minLocId := math.MaxInt
+	for _, seedId := range *seedIds {
+		locId := translateSeed(seedId, translators)
+		// we got the locId - let's store the min value
+		if locId < minLocId {
+			minLocId = locId
+		}
+	}
+
+	return minLocId
+
 }
