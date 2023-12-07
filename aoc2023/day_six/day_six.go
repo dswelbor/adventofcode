@@ -15,7 +15,18 @@ type RaceRecord struct {
 	totalTime int
 }
 
-// Calculates winning moves (or milliseconds to accelerate) to break current RaceRecord
+// Calculates winning moves (or milliseconds to accelerate) to break current
+// RaceRecord. This relies on:
+//
+//	Tt=Tc+Tm, d<=v*Tm, v=Tc*1
+//
+// and solving for Tc where:
+//
+//	Tt is total time, Tc is time charging, Tm is time moving
+//	d is distance, and v is velocity
+//
+// With those equations known, we get 0 <= (-1)*(Tc)^2 + Tt*Tc + (-1)*d
+// and we can solve for Tc with Tt and d known for a given race
 func (r *RaceRecord) Moves() *[]int {
 	// calc bounds for min and max times
 	time1 := (float64((-1)*(r.totalTime)) + math.Sqrt(float64((r.totalTime*r.totalTime)-(4*r.distance)))) / (-2) // prolly min
@@ -35,7 +46,7 @@ func (r *RaceRecord) Moves() *[]int {
 	minTime := int(math.Ceil(min))
 	maxTime := int(math.Floor(max))
 
-	// Add int times to list as moves
+	// Add int Tc times to list as moves
 	timesCount := maxTime - minTime + 1
 	winAccelTimes := make([]int, timesCount)
 	for i := 0; i < timesCount; i++ {
@@ -65,11 +76,9 @@ func solvePartOne(input *[]string) {
 	fmt.Println("--- Solving Day Six - Part One! ---")
 
 	// Fetch Records
-	raceRecords := parseRaceRecords(input)
-	//fmt.Println("[DEBUG] List of Record objects", raceRecords)
+	raceRecords := parseRaceRecords(input, false)
 	// Fetch winning move counts
 	moveCounts := listMoveCounts(raceRecords)
-	// fmt.Println("[DEBUG] These are the expected possible winning move counts: ", moveCounts)
 	// Calculate margin for error - multiple all elements of moveCounts
 	errMargin := utility.MultipleNumbers(moveCounts)
 	fmt.Println("Margin for error (product of winning move counts): ", errMargin)
@@ -79,6 +88,14 @@ func solvePartOne(input *[]string) {
 // Entry point for day 6 part 2 solution
 func solvePartTwo(input *[]string) {
 	fmt.Println("--- Solving Day Six - Part Two! ---")
+
+	// Fetch Records - fix "kerning" by replacing spaces in input
+	raceRecords := parseRaceRecords(input, true)
+	// Fetch winning move counts
+	moveCounts := listMoveCounts(raceRecords)
+	// Calculate margin for error - multiple all elements of moveCounts
+	errMargin := utility.MultipleNumbers(moveCounts)
+	fmt.Println("Margin for error (product of winning move counts) with fixed kerning: ", errMargin)
 }
 
 func listMoveCounts(raceRecords *[]RaceRecord) *[]int {
@@ -97,12 +114,17 @@ func listMoveCounts(raceRecords *[]RaceRecord) *[]int {
 }
 
 // Utility functions iterates through input and builds a list of RaceRecords
-func parseRaceRecords(input *[]string) *[]RaceRecord {
+func parseRaceRecords(input *[]string, replaceSpaces bool) *[]RaceRecord {
 	// parse out the times and distance into parallel arrays
 	numReg := regexp.MustCompile("\\d+")
 	timeStrings := make([]string, 0)
 	distStrings := make([]string, 0)
 	for _, inputStr := range *input {
+		// Edge case - fix kerning by replacing all whitespace
+		if replaceSpaces {
+			spaceReg := regexp.MustCompile("\\s+")
+			inputStr = spaceReg.ReplaceAllString(inputStr, "")
+		}
 		if strings.HasPrefix(inputStr, "Time:") {
 			// Time input
 			timeStrings = numReg.FindAllString(inputStr, -1)
