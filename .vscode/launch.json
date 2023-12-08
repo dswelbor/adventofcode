@@ -59,6 +59,14 @@
             "mode": "auto",
             "program": "${workspaceFolder}/aoc2023/runner.go",
             "args": ["-day=6", "-file=data/day_six_ex.txt", "-part=1"]
+        },
+        {
+            "name": "Launch aoc2023 day seven part one ex input",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/aoc2023/runner.go",
+            "args": ["-day=7", "-file=data/day_seven_ex.txt", "-part=1"]
         }
     ]
 }
