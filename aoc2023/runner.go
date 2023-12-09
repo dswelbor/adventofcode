@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/dswelbor/adventofcode/aoc2023/day_eight"
 	"github.com/dswelbor/adventofcode/aoc2023/day_five"
 	"github.com/dswelbor/adventofcode/aoc2023/day_four"
 	"github.com/dswelbor/adventofcode/aoc2023/day_one"
@@ -46,6 +47,8 @@ func main() {
 		day_six.SolveDaySix(inputPtr, *partPtr)
 	case 7:
 		day_seven.SolveDaySeven(inputPtr, *partPtr)
+	case 8:
+		day_eight.SolveDayEight(inputPtr, *partPtr)
 	default:
 		fmt.Println("Day: " + strconv.Itoa(*dayPtr) + " not implemented")
 	}
