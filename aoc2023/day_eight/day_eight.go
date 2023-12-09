@@ -32,6 +32,10 @@ func solvePartOne(input *[]string) {
 	desertMap := parseDesertMap(input)
 	fmt.Println("[DEBUG] desertMap steps length: ", len(*desertMap.steps))
 	fmt.Println("[DEBUG] desertMap edges length: ", len(*desertMap.edges))
+
+	// Let's count the steps from traversing the mapped graph
+	totalSteps := navigateDesertMap(desertMap, "AAA", "ZZZ")
+	fmt.Println("[COMPLETE] Reached destination \"ZZZ\"! Steps taken: ", totalSteps)
 }
 
 // Entry point for day 8 part 2 solution
@@ -87,7 +91,41 @@ func parseDesertMap(input *[]string) *DesertMap {
 	return &desertMap
 }
 
-func navigateDesertMap(steps *[]rune) int {
-	// TODO: Implement me
+func navigateDesertMap(desertMap *DesertMap, startNodeId string, endNodeId string) int {
+	// Grab edges, steps, and init nodeId
+	steps := *desertMap.steps
+	edges := *desertMap.edges
+	nodeId := startNodeId
+	// Iterate through steps - emulate a circular linked list with modulo
+	stepCount := 0
+
+	for found := false; !found; stepCount++ {
+		// test
+		// found = true
+
+		// Check if we are done
+		if nodeId == endNodeId {
+			found = true
+		}
+
+		// get mod from step counter - steps loop around
+		// grab step direction index
+		stepIndex := stepCount % len(steps)
+		stepDir := steps[stepIndex]
+
+		// Traverse to next node
+		nodeEdges := edges[nodeId]
+		nextNodeId := nodeEdges[stepDir]
+		fmt.Println("[INFO] Traversing from ", nodeId, " to ", nextNodeId,
+			"\t\tstep count: ", stepCount+1)
+		// set nodeId to next nodeId
+		nodeId = nextNodeId
+
+	}
+
+	// traversed the graph to destination - return counted steps
+	// account for stepCount++ always incrementing - even on the last iteration where we are found
+	return stepCount - 1
+
 	return 0
 }
