@@ -224,7 +224,9 @@ func (r *WildCardRankingBehavior) isThreeOfAKind(freqMap *map[rune]int) bool {
 	// 4 keys and 1 wildcard (the pair becomes a 3 of a kind)
 	// OR 3 keys and trio == 1 and no wildcards
 	condMet := (len(*freqMap) == 4 && wildCardCount == 1) ||
+		(len(*freqMap) == 4 && wildCardCount == 2) ||
 		(len(*freqMap) == 3 && trioCount == 1 && wildCardCount == 0)
+
 	return condMet
 }
 
@@ -284,8 +286,10 @@ func (r *WildCardRankingBehavior) isFourOfAKind(freqMap *map[rune]int) bool {
 			}
 		*/
 	}
-	// quad and 0 wildcards OR trio and 1 wildcard OR 1 pair (+ the pair of wildcards) and 2 wildcards will evaluate up to 4 of a kind
-	condMet := (quadCount == 1 && wildCardCount == 0) || (trioCount == 1 && wildCardCount == 1) || (pairCount == 2 && wildCardCount == 2)
+	// quad and 0 wildcards OR trio and 1 wildcard OR 1 pair (+ the pair of wildcards)
+	// and 2 wildcards will evaluate up to 4 of a kind
+	condMet := (quadCount == 1 && wildCardCount == 0) || (trioCount == 1 && wildCardCount == 1) ||
+		(pairCount == 2 && wildCardCount == 2) || (len(*freqMap) == 3 && wildCardCount == 3)
 	return condMet
 }
 
