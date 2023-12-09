@@ -128,10 +128,6 @@ func solvePartOne(input *[]string) {
 func solvePartTwo(input *[]string) {
 	fmt.Println("--- Solving Day Seven - Part Two! ---")
 
-	// Notes: d7 pt2
-	// 254456791 is too high
-	// 254412181 is correct
-	// 254351629 is too low
 	// init Ranking Behavior (jokers are wildcards)
 	var wildRankingBehaviorPtr RankingBehavior
 	wildRankingBehaviorPtr = &WildCardRankingBehavior{
