@@ -41,6 +41,8 @@ func solvePartOne(input *[]string) {
 // Entry point for day 8 part 2 solution
 func solvePartTwo(input *[]string) {
 	fmt.Println("--- Solving Day Eight - Part Two! ---")
+
+	// NOTE: Part 2 is conceptually a BFS
 }
 
 func parseDesertMap(input *[]string) *DesertMap {
@@ -126,6 +128,4 @@ func navigateDesertMap(desertMap *DesertMap, startNodeId string, endNodeId strin
 	// traversed the graph to destination - return counted steps
 	// account for stepCount++ always incrementing - even on the last iteration where we are found
 	return stepCount - 1
-
-	return 0
 }
