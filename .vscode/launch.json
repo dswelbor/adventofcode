@@ -67,6 +67,22 @@
             "mode": "auto",
             "program": "${workspaceFolder}/aoc2023/runner.go",
             "args": ["-day=7", "-file=data/day_seven_ex.txt", "-part=1"]
+        },
+        {
+            "name": "Launch aoc2023 day seven part two ex input",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/aoc2023/runner.go",
+            "args": ["-day=7", "-file=data/day_seven_ex.txt", "-part=2"]
+        },
+        {
+            "name": "Launch aoc2023 day seven part two input",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/aoc2023/runner.go",
+            "args": ["-day=7", "-file=data/day_seven_input.txt", "-part=2"]
         }
     ]
 }

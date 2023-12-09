@@ -76,6 +76,10 @@ func (h *CardHand) HandType() int {
 	// for _, c := range cardRunes {
 	// 	cardFreq[c] += 1
 	// }
+	// Debugging
+	if h.Cards == "KTJJT" {
+		fmt.Println("Let's pause here")
+	}
 	rankBehavior := *h.RankBehavior
 	handType := rankBehavior.Type(h.Cards)
 
@@ -123,6 +127,27 @@ func solvePartOne(input *[]string) {
 // Entry point for day 7 part 2 solution
 func solvePartTwo(input *[]string) {
 	fmt.Println("--- Solving Day Seven - Part Two! ---")
+
+	// Notes: d7 pt2
+	// 254456791 is too high
+	// init Ranking Behavior (jokers are wildcards)
+	var wildRankingBehaviorPtr RankingBehavior
+	wildRankingBehaviorPtr = &WildCardRankingBehavior{
+		name:             "Joker is Wild Ranking Behavior",
+		highLowOrderding: "AKQT98765432J",
+	}
+
+	// Grab a collection of card hands
+	cardHands := parseCardHands(input, &wildRankingBehaviorPtr)
+
+	// Now let's order in rank (rank=index+1) by CardHand strength
+	sort.Slice(*cardHands, func(i, j int) bool {
+		return (*cardHands)[i].Less(&(*cardHands)[j])
+	})
+
+	// we have a sorted list of card hands - let's sum total winnings
+	totalWinnings := calcTotalWinnings(cardHands)
+	fmt.Println("Total Winnings: ", totalWinnings)
 }
 
 // Takes a list of lines from input and creates a collection of CardHands
