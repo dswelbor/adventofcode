@@ -34,7 +34,7 @@ func solvePartOne(input *[]string) {
 	fmt.Println("[DEBUG] desertMap edges length: ", len(*desertMap.edges))
 
 	// Let's count the steps from traversing the mapped graph
-	totalSteps := navigateDesertMap(desertMap, "AAA", "ZZZ")
+	totalSteps := iterateStepOrderIterative(desertMap, "AAA", "ZZZ")
 	fmt.Println("[COMPLETE] Reached destination \"ZZZ\"! Steps taken: ", totalSteps)
 }
 
@@ -48,7 +48,7 @@ func solvePartTwo(input *[]string) {
 	fmt.Println("[DEBUG] desertMap edges length: ", len(*desertMap.edges))
 
 	// NOTE: Part 2 is conceptually a BFS? Maybe?
-	totalSteps := navDesertMapParallel(desertMap, "\\w\\wA", "\\w\\wZ")
+	totalSteps := iterateStepOrderListIterative(desertMap, "\\w\\wA", "\\w\\wZ")
 
 	// Let's print our results
 	fmt.Println("[COMPLETE] Finished traversal with total steps: ", totalSteps)
@@ -102,7 +102,7 @@ func parseDesertMap(input *[]string) *DesertMap {
 	return &desertMap
 }
 
-func navigateDesertMap(desertMap *DesertMap, startNodeId string, endNodeId string) int {
+func iterateStepOrderIterative(desertMap *DesertMap, startNodeId string, endNodeId string) int {
 	// Grab edges, steps, and init nodeId
 	steps := *desertMap.steps
 	edges := *desertMap.edges
@@ -139,7 +139,7 @@ func navigateDesertMap(desertMap *DesertMap, startNodeId string, endNodeId strin
 	return stepCount - 1
 }
 
-func navDesertMapParallel(desertMap *DesertMap, startPattern string, endPattern string) int {
+func iterateStepOrderListIterative(desertMap *DesertMap, startPattern string, endPattern string) int {
 	// build reg objects
 	// startPattern = "\\w\\wA"
 	// endPattern = "\\w\\wZ"
@@ -186,14 +186,12 @@ func navDesertMapParallel(desertMap *DesertMap, startPattern string, endPattern 
 
 		// Check if we are done
 		for i, nodeId := range nodeIds {
-			// foundEndIds := make([]int, 0)
-			// nextNodeId := nodeEdges[stepDir] // useful for debugging
 			found := endReg.FindString(nodeId)
 			if len(found) > 0 {
 				// fmt.Println("[Debug] Found End Node: ", found, "\tstep direction: ", stepDirStr, "\tstep count: ", stepCount)
 				foundEndIds = append(foundEndIds, found)
 			}
-			foundAll = foundAll && len(found) > 0
+			// foundAll = foundAll && len(found) > 0 // equiv to foundAll = false && true (aka contradiction)
 
 			// Traverse to next node
 			nodeEdges := edges[nodeId]
@@ -217,19 +215,89 @@ func navDesertMapParallel(desertMap *DesertMap, startPattern string, endPattern 
 			// we have more than one end id
 			fmt.Println("[Debug] Found ", len(foundEndIds), " Nodes: ", foundEndIds, "\tstep direction: ", stepDirStr, "\tstep count: ", stepCount)
 		}
-		// if nodeId == endNodeId {
-		// 	found = true
-		//}
+		// let's assign the next nodeIds for next iteration
+		nodeIds = nextNodeIds
+	}
+	return stepCount - 1
+}
 
-		/*
+func iterateStepOrderListCalculated(desertMap *DesertMap, startPattern string, endPattern string) int {
+	// build reg objects
+	// startPattern = "\\w\\wA"
+	// endPattern = "\\w\\wZ"
+	startReg := regexp.MustCompile(startPattern)
+	endReg := regexp.MustCompile(endPattern)
+
+	// Grab edges, steps, and init nodeId
+	// steps := *desertMap.steps
+	edges := *desertMap.edges
+	// Find list of starting nodeIds and endNodeIds
+	startNodeIds := make([]string, 0)
+	endNodeIds := make([]string, 0)
+	for nodeId, _ := range edges {
+		startMatch := startReg.FindString(nodeId)
+		endMatch := endReg.FindString(nodeId)
+		if len(startMatch) > 0 {
+			// found a starting node
+			startNodeIds = append(startNodeIds, startMatch)
+		} else if len(endMatch) > 0 {
+			// found an end node
+			endNodeIds = append(endNodeIds, endMatch)
+		}
+	}
+
+	fmt.Println("[DEBUG] Starting Node IDs: ", startNodeIds)
+	fmt.Println("[DEBUG] Ending NodeIDs: ", endNodeIds)
+
+	// init nodeId and steps
+	steps := *desertMap.steps
+	nodeIds := startNodeIds
+	// Iterate through steps - emulate a circular linked list with modulo
+	stepCount := 0
+	for foundAll := false; !foundAll; stepCount++ {
+		// grab step direction index
+		stepIndex := stepCount % len(steps)
+		stepDir := steps[stepIndex]
+		lrMap := []string{"L", "R"}
+		stepDirStr := lrMap[stepDir]
+		// init list for next traverse iteration
+		nextNodeIds := make([]string, len(nodeIds))
+
+		// debugging - store found ids to check length
+		foundEndIds := make([]string, 0)
+
+		// Check if we are done
+		for i, nodeId := range nodeIds {
+			found := endReg.FindString(nodeId)
+			if len(found) > 0 {
+				// fmt.Println("[Debug] Found End Node: ", found, "\tstep direction: ", stepDirStr, "\tstep count: ", stepCount)
+				foundEndIds = append(foundEndIds, found)
+			}
+			// foundAll = foundAll && len(found) > 0 // equiv to foundAll = false && true (aka contradiction)
+
 			// Traverse to next node
 			nodeEdges := edges[nodeId]
 			nextNodeId := nodeEdges[stepDir]
-			fmt.Println("[INFO] Traversing from ", nodeId, " to ", nextNodeId,
-				"\t\tstep count: ", stepCount+1)
+			// fmt.Println("[INFO] Traversing from ", nodeId, " to ", nextNodeId,
+			// 	"\t\tstep count: ", stepCount+1)
 			// set nodeId to next nodeId
-			nodeId = nextNodeId
-		*/
+			// nodeId = nextNodeId
+			// add nextNodeId to nextNodeIds list
+			nextNodeIds[i] = nextNodeId
+		}
+
+		// Set stopping condition
+		if len(foundEndIds) == len(nodeIds) {
+			// all nodes in parallel ordered traversal meet conditions
+			foundAll = true
+		}
+
+		// debugging - how many end nodes are found?
+		if len(foundEndIds) > 1 {
+			// we have more than one end id
+			fmt.Println("[Debug] Found ", len(foundEndIds), " Nodes: ", foundEndIds, "\tstep direction: ", stepDirStr, "\tstep count: ", stepCount)
+		}
+		// let's assign the next nodeIds for next iteration
 		nodeIds = nextNodeIds
 	}
 	return stepCount - 1
