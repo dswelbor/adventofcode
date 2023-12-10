@@ -17,3 +17,20 @@ func MultipleNumbers(numbers *[]int) int {
 	}
 	return product
 }
+
+// Calculates the Least Common Multiple for 2 numbers. This assumes that
+// LCM(a, b) = ab/GCD(a,b)) = a/GCD(a,b)*b. There's a good discussion on this
+// at: https://stackoverflow.com/a/3154503
+func LCM(a int, b int) int {
+	lcm := a / RecursiveGCD(a, b) * b
+	return lcm
+}
+
+// This is a recursive implementation of GCD in Go borrowed under the MIT license at:
+// https://github.com/TheAlgorithms/Go/blob/master/LICENSE
+func RecursiveGCD(a, b int) int {
+	if b == 0 {
+		return a
+	}
+	return RecursiveGCD(b, a%b)
+}

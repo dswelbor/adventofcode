@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+
+	"github.com/dswelbor/adventofcode/aoc2023/utility"
 )
 
 type DesertMap struct {
@@ -48,7 +50,8 @@ func solvePartTwo(input *[]string) {
 	fmt.Println("[DEBUG] desertMap edges length: ", len(*desertMap.edges))
 
 	// NOTE: Part 2 is conceptually a BFS? Maybe?
-	totalSteps := iterateStepOrderListIterative(desertMap, "\\w\\wA", "\\w\\wZ")
+	totalSteps := iterateStepOrderListCalculated(desertMap, "\\w\\wA", "\\w\\wZ")
+	// totalSteps := iterateStepOrderListCalculated(desertMap, "\\w\\wA", "\\w\\wZ")
 
 	// Let's print our results
 	fmt.Println("[COMPLETE] Finished traversal with total steps: ", totalSteps)
@@ -172,12 +175,13 @@ func iterateStepOrderListIterative(desertMap *DesertMap, startPattern string, en
 	nodeIds := startNodeIds
 	// Iterate through steps - emulate a circular linked list with modulo
 	stepCount := 0
+	// debugging
 	for foundAll := false; !foundAll; stepCount++ {
 		// grab step direction index
 		stepIndex := stepCount % len(steps)
 		stepDir := steps[stepIndex]
-		lrMap := []string{"L", "R"}
-		stepDirStr := lrMap[stepDir]
+		// lrMap := []string{"L", "R"}
+		// stepDirStr := lrMap[stepDir]
 		// init list for next traverse iteration
 		nextNodeIds := make([]string, len(nodeIds))
 
@@ -188,8 +192,9 @@ func iterateStepOrderListIterative(desertMap *DesertMap, startPattern string, en
 		for i, nodeId := range nodeIds {
 			found := endReg.FindString(nodeId)
 			if len(found) > 0 {
-				// fmt.Println("[Debug] Found End Node: ", found, "\tstep direction: ", stepDirStr, "\tstep count: ", stepCount)
+				// fmt.Println("[Debug] Found End Node: ", found, "\tstepIndex: ", stepIndex, "\tstep count: ", stepCount)
 				foundEndIds = append(foundEndIds, found)
+				fmt.Println("[INFO] Starting node: ", startPattern, " end node: ", found, " step index: ", stepIndex, " stepCount: ", strconv.Itoa(stepCount))
 			}
 			// foundAll = foundAll && len(found) > 0 // equiv to foundAll = false && true (aka contradiction)
 
@@ -211,16 +216,22 @@ func iterateStepOrderListIterative(desertMap *DesertMap, startPattern string, en
 		}
 
 		// debugging - how many end nodes are found?
-		if len(foundEndIds) > 1 {
-			// we have more than one end id
-			fmt.Println("[Debug] Found ", len(foundEndIds), " Nodes: ", foundEndIds, "\tstep direction: ", stepDirStr, "\tstep count: ", stepCount)
-		}
+		// if len(foundEndIds) > 1 {
+		// we have more than one end id
+		// 	fmt.Println("[Debug] Found ", len(foundEndIds), " Nodes: ", foundEndIds, "\tstep direction: ", stepDirStr, "\tstep count: ", stepCount)
+		// }
 		// let's assign the next nodeIds for next iteration
 		nodeIds = nextNodeIds
 	}
 	return stepCount - 1
 }
 
+// iterating through each node in a step order traversal - we see a lot of cycles.
+// We can leverage these cycles and cycle lengths to calculate the number of steps
+// before the stopping condition is met. Since the step order traveral cycles
+// basically represent a Directed Cyclic Graph and the same traversal order and
+// length will repeat forever. From this, the least common multiple of all matching
+// step order traversals represent least steps required to reach stopping condition.
 func iterateStepOrderListCalculated(desertMap *DesertMap, startPattern string, endPattern string) int {
 	// build reg objects
 	// startPattern = "\\w\\wA"
@@ -249,56 +260,28 @@ func iterateStepOrderListCalculated(desertMap *DesertMap, startPattern string, e
 	fmt.Println("[DEBUG] Starting Node IDs: ", startNodeIds)
 	fmt.Println("[DEBUG] Ending NodeIDs: ", endNodeIds)
 
-	// init nodeId and steps
-	steps := *desertMap.steps
-	nodeIds := startNodeIds
-	// Iterate through steps - emulate a circular linked list with modulo
-	stepCount := 0
-	for foundAll := false; !foundAll; stepCount++ {
-		// grab step direction index
-		stepIndex := stepCount % len(steps)
-		stepDir := steps[stepIndex]
-		lrMap := []string{"L", "R"}
-		stepDirStr := lrMap[stepDir]
-		// init list for next traverse iteration
-		nextNodeIds := make([]string, len(nodeIds))
+	// let's get least distance to get from startNode to endNode for each element
+	distances := make([]int, len(startNodeIds))
+	for i := 0; i < len(startNodeIds); i++ {
+		startNodeId := startNodeIds[i]
+		// endNodeId := endNodeIds[i]
+		dist := iterateStepOrderListIterative(desertMap, startNodeId, endPattern)
+		distances[i] = dist
 
-		// debugging - store found ids to check length
-		foundEndIds := make([]string, 0)
-
-		// Check if we are done
-		for i, nodeId := range nodeIds {
-			found := endReg.FindString(nodeId)
-			if len(found) > 0 {
-				// fmt.Println("[Debug] Found End Node: ", found, "\tstep direction: ", stepDirStr, "\tstep count: ", stepCount)
-				foundEndIds = append(foundEndIds, found)
-			}
-			// foundAll = foundAll && len(found) > 0 // equiv to foundAll = false && true (aka contradiction)
-
-			// Traverse to next node
-			nodeEdges := edges[nodeId]
-			nextNodeId := nodeEdges[stepDir]
-			// fmt.Println("[INFO] Traversing from ", nodeId, " to ", nextNodeId,
-			// 	"\t\tstep count: ", stepCount+1)
-			// set nodeId to next nodeId
-			// nodeId = nextNodeId
-			// add nextNodeId to nextNodeIds list
-			nextNodeIds[i] = nextNodeId
-		}
-
-		// Set stopping condition
-		if len(foundEndIds) == len(nodeIds) {
-			// all nodes in parallel ordered traversal meet conditions
-			foundAll = true
-		}
-
-		// debugging - how many end nodes are found?
-		if len(foundEndIds) > 1 {
-			// we have more than one end id
-			fmt.Println("[Debug] Found ", len(foundEndIds), " Nodes: ", foundEndIds, "\tstep direction: ", stepDirStr, "\tstep count: ", stepCount)
-		}
-		// let's assign the next nodeIds for next iteration
-		nodeIds = nextNodeIds
 	}
-	return stepCount - 1
+	// Let's get distances to console
+	fmt.Println("[DEBUG] Distances: ", distances)
+
+	// We've got the distances - Let's get the least common multiple of those distances
+	// TODO: Handle edge case where we have a singleton list
+	stepCount := distances[0]
+	for i := 0; i < len(distances); i++ {
+		// a := distances[i]
+		a := stepCount
+		b := distances[i]
+		stepCount = utility.LCM(a, b)
+	}
+	// Edge Case - probably for singletons we reach here? need to test (0 < 0 is false)
+
+	return stepCount
 }
