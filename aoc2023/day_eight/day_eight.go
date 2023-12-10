@@ -206,6 +206,12 @@ func navDesertMapParallel(desertMap *DesertMap, startPattern string, endPattern 
 			nextNodeIds[i] = nextNodeId
 		}
 
+		// Set stopping condition
+		if len(foundEndIds) == len(nodeIds) {
+			// all nodes in parallel ordered traversal meet conditions
+			foundAll = true
+		}
+
 		// debugging - how many end nodes are found?
 		if len(foundEndIds) > 1 {
 			// we have more than one end id
