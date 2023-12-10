@@ -36,7 +36,7 @@ func solvePartOne(input *[]string) {
 	fmt.Println("[DEBUG] desertMap edges length: ", len(*desertMap.edges))
 
 	// Let's count the steps from traversing the mapped graph
-	totalSteps := iterateStepOrderIterative(desertMap, "AAA", "ZZZ")
+	totalSteps := iterateStepOrderListIterative(desertMap, "AAA", "ZZZ")
 	fmt.Println("[COMPLETE] Reached destination \"ZZZ\"! Steps taken: ", totalSteps)
 }
 
